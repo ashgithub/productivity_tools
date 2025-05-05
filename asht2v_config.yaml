@@ -1,0 +1,22 @@
+cache_dir:  ~/Documents/ai_t2v
+oci:
+    compartment_id: "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga"
+    profile: "INNO-SANDBOX"
+    config: "~/.oci/config"
+oci_genai_config:
+    model_name: "meta.llama-3.3-70b-instruct"
+    endpoint: "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
+oci_speech_config:
+  service_endpoint: "https://speech.aiservice.us-phoenix-1.oci.oraclecloud.com"
+bucket: 
+  namespace: axaemuxiyife
+  bucket_name: EphemeralBucket
+  prefix: asagarwa/talk2video
+llm_ollama:
+    model_name: "llama3-groq-tool-use"
+    #model_name: "deepseek-r1"
+    #model_name: "phi4-mini"
+    #model_name: "mistral"
+    url: "https://macmini.industrylab.uk/ollama/"
+    api_key: ${OLLAMA_AUTHKEY}
+    summarize_prompt: You are an reporter who specializes in sumamrizing meeting. I will give youthe transcript of an call. you will summarize it ans answer questions about it 
