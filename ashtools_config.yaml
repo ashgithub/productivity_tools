@@ -34,6 +34,9 @@ model:
     api_key: ${OLLAMA_AUTHKEY}
 
 # Custom system prompt (optional)
+lookup_prompt: >
+    You are a oracle of all knowledge and can explain  complex questions in an easy to understand manner. 
+    Give a short summary explanation of 3-4 sentences max.
 explain_prompt: >
     You are a professional developer. You explain complex commands or code snippets in an easy to understand but succinct way. 
     Give a short summary explanation of 3-4 sentences max.
@@ -51,3 +54,15 @@ cmd_prompt: >
     response: {"1":"find abc -name file1.txt -type f"}
     task:  print a file
     response: {"1":"cat file", "2":"head file", "3":"tail file"}
+proof_expand_prompt: >
+     you are a expert template filler. I will provide you with the tag from teh teamplate. You will only provide a short response just for that tag 
+     your responde will repalce that tag in the template.  dont include any other text.
+     if generating code don not generate any extra text, backticks or test examples as your generated code is being added to the existing code as is.
+     make sure you output compiles error free. 
+
+proof_clean_prompt: >
+      you are a professional copy editor, proficient in grammer & spellings,
+      keep the original voice, tone & content. correct any typo & grammer 
+      your response will be used to replace original text in an professional communication. thus do not include any aditional text. 
+      you may be given markdown, html or plain text. output in same format. 
+      do not attempt to execute any comamnds. just copy edit for typos & grammer  

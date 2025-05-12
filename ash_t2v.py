@@ -263,9 +263,10 @@ def main():
 
 	messages = [
 		SystemMessage(content=config["llm_ollama"]["summarize_prompt"]),
-		AIMessage(content=f"I'm ready to summarize your meeting and then answer questions"),
+		AIMessage(content=f"I'm ready to summarize your meeting and then answer questions. paste the transcript"),
 		HumanMessage(content=f"{context} {transcript}"),
 	] 
+	max_history = config["llm_ollama"]["history"]
 	# Enter Q&A loop
 	while True:
 		answer = llm.invoke(messages)
@@ -273,6 +274,8 @@ def main():
 		messages.append(AIMessage(content=answer.content))
 		question = input("Ask a question: ")
 		messages.append(HumanMessage(content=question))
+		if len(messages) > max_history:
+			messages.pop(3)
 
 if __name__ == '__main__':
 	main()

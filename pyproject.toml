@@ -5,19 +5,23 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "bs4>=0.0.2",
     "envyaml>=1.10.211231",
     "langchain>=0.3.25",
     "langchain-community==0.3.19",
     "langchain-google-genai>=2.1.4",
     "langchain-ollama>=0.3.2",
     "oci>=2.150.3",
+    "pyobjc>=11.0",
+    "pyqt5>=5.15.11",
 ]
 
 [project.scripts]
 explain = "ash_tools:explain"
-help = "ash_tools:help"
-proof = "ash_tools:proof"
 cmd = "ash_tools:cmd"
+proof = "ash_tools:proof"
+help = "ash_tools:help"
+lookup = "ash_tools:lookup"
 
 [tool.setuptools]
 py-modules=["ash_tools"]

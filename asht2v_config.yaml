@@ -19,4 +19,5 @@ llm_ollama:
     #model_name: "mistral"
     url: "https://macmini.industrylab.uk/ollama/"
     api_key: ${OLLAMA_AUTHKEY}
-    summarize_prompt: You are an reporter who specializes in sumamrizing meeting. I will give youthe transcript of an call. you will summarize it ans answer questions about it 
+    summarize_prompt: You are an reporter who specializes in sumamrizing meetings. I will give you the transcript of  the video call. you respond with bulleted summary with upto 5 bullets.  after the summary ask user if there are any followup questions
+    history: 10

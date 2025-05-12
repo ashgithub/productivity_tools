@@ -1,5 +1,5 @@
-#!/usr/bin/env -S uv run 
-##/usr/bin/env -S uv run --script
+#!/usr/bin/env -S /opt/homebrew/bin/uv  run 
+##/usr/bin/env -S /opt/homebrew/bin/uv  run --script
 
 
 # /// script
@@ -15,7 +15,7 @@
 # ///
 import sys,os 
 import requests,json
-import argparse
+import argparse, re
 from pathlib import Path
 from typing import Dict, Any
 from envyaml import EnvYAML
@@ -76,24 +76,32 @@ def get_chat_model(config: Dict[str, Any]):
     # Get the appropriate factory function or default to ollama
     factory_func = model_factories.get(model_type, create_ollama_model)
     
+    global model_name
+    model_name = model_params.get('model_name')
     # Create and return the model
-    return factory_func(model_params), model_params.get('model_name')
+    return factory_func(model_params)
 
-def get_prompt_template(mode: str) -> str:
-    """Return the appropriate system prompt based on the specified mode."""
-    prompt_templates = {
-        "explain": "You are a professional developer. You explain complex commands or code snippets in an easy to understand but succinct way. Give a short summary explanation of 3-4 sentences max.",
-        "cmd": "You are a command-line expert. Provide the exact command syntax, explain each parameter, and give practical examples for the command. Be concise but comprehensive.",
-        "lookup": "You are a technical encyclopedia. Look up and provide detailed information about the given topic. Include key concepts, common use cases, and technical specifications when relevant.",
-        "proof": "You are a mathematics expert. Provide a clear, step-by-step mathematical proof for the given statement or theorem. Ensure each step is logically sound and properly explained."
-    }
-    
-    return prompt_templates.get(mode, prompt_templates["explain"])
+# for proof 
+def extract_text_between_tags(text):
+    pattern = r"{{(.*?)}}"
+    matches = re.findall(pattern, text)
+    return matches
+
+# for proof 
+def call_model(human, system, ai,chat):
+    messages = [
+        SystemMessage(content=system),
+        AIMessage(content=ai),
+        HumanMessage(content=human),
+    ]
+    response = chat.invoke(messages)
+    return response.content
+
 
 def main(args):
     # Set up argument parser
     parser = argparse.ArgumentParser(description="Process input with different prompt modes")
-    parser.add_argument("-m","--mode",  choices=["explain", "cmd", "help", "proof"], required=True,
+    parser.add_argument("-m","--mode",  choices=["explain", "cmd", "help", "lookup", "proof"], required=True,
                         help="The type of prompt to use (default: explain)")
     parser.add_argument("-c", "--config_path", nargs="?", type=Path, default=Path("/Users/ashish/work/code/python/ash_tools/ashtools_config.yaml"),
                         help="Path to configuration file")
@@ -122,36 +130,32 @@ def main(args):
     # Load configuration
     config = load_config(args.config_path)
     
-    # Get the appropriate system prompt based on mode
-    system_prompt = get_prompt_template(args.mode)
-    
-    # Prepare messages
-    messages = [
-        SystemMessage(content=config.get(f"{args.mode}_prompt", system_prompt)),
-        AIMessage(content=f"I'm ready to {args.mode} your input."),
-        HumanMessage(content=f"{args.mode} {input_text}"),
-    ]
-    
     # Initialize the appropriate chat model
-    global model_name
-    chat, model_name = get_chat_model(config)
-    
-    # Get response
-    response = chat.invoke(messages)
-
-    # return response
-    return f"{response.content}"
+    chat = get_chat_model(config)
+   
+    return chat, config, input_text
 
 def explain():
-    response = main(["-m","explain"]+sys.argv[1:])
+    chat,config,input_text = main(["-m","explain"]+sys.argv[1:])
+    
+    response = call_model(input_text,config.get("explain_prompt"), "I'm ready to  explain your input.",chat)
     print(f"[{model_name}]\n{response}")
 
 def help():
-    response = main(["-m","help"]+sys.argv[1:])
+    chat,config,input_text = main(["-m","help"]+sys.argv[1:])
+    response = call_model(input_text,config.get("help_prompt"), "I'm ready to suggest commands for your input.",chat)
+
+
+    print(f"[{model_name}]\n{response}")
+
+def lookup():
+    chat,config,input_text = main(["-m","lookup"]+sys.argv[1:])
+    response = call_model(input_text,config.get("lookup_prompt"), "I'm ready to answer your question.",chat)
     print(f"[{model_name}]\n{response}")
 
 def cmd():
-    response = main(["-m","cmd"]+sys.argv[1:])
+    chat,config,input_text = main(["-m","cmd"]+sys.argv[1:])
+    response = call_model(input_text,config.get("cmd_prompt"), "I'm ready to suggest commands for your input.",chat)
     try:
         alternatives = json.loads(response)
         for alt,cmd in alternatives.items():
@@ -161,12 +165,34 @@ def cmd():
         
 
 def proof():
-    response = main(["-m","proof"]+sys.argv[1:])
-    print(response)
+    chat,config,input_text = main(["-m","proof"]+sys.argv[1:])
+    #extract tags between input
+    final_text = input_text
+    prompt_text = input_text
+    
+    extracted_text = extract_text_between_tags(input_text)
+    
+    for tag in extracted_text:
+        response = call_model(tag,config.get("proof_expand_prompt"),"I am ready to expand tags fro your template",chat)
+        final_text = final_text.replace("{{"+tag+"}}",response)
+        prompt_text = prompt_text.replace("{{"+tag+"}}","")
+
+    if  prompt_text and prompt_text.isspace() == False:
+        final_text = call_model(final_text, config.get("proof_clean_prompt"),"I am ready to proof read your text and edit it",chat)
+    
+    print(final_text, end='', flush=True)
 
 if __name__ == "__main__":
-    try: 
-        response = main(sys.argv[1:])
-        print(response)
-    except Exception as e:
-        print(f"error: {e}")
+    
+    if len(sys.argv) < 3:
+        main(sys.argv[1:])
+    else: 
+        try: 
+            func_name = sys.argv[2]
+            # Check if the function exists in the global namespace and call it
+            if func_name in globals() and callable(globals()[func_name]):
+                globals()[func_name]()
+            else:
+                print(f"Unknown function: {func_name}")
+        except Exception as e:
+            print(f"error: {e}")

@@ -11,3 +11,13 @@ wheels/
 
 #spple
 .DS_Store
+
+#test directorirs
+clipboard_experiment/
+automator_workflow/
+
+#hidden directories
+.*/
+
+# temp files 
+tmp/
