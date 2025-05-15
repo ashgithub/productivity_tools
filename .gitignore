@@ -23,4 +23,4 @@ automator_workflow/
 tmp/
 
 #media files
-.ts
+*.ts
