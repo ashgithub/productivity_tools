@@ -8,7 +8,10 @@ model:
     #model_name: "cohere.command-r-plus-08-2024"
     #model_name: "cohere.command-r-08-2024"
     #model_name: "meta.llama-3.1-405b-instruct"
-    model_name: "meta.llama-3.3-70b-instruct"
+    #model_name: "cohere.command-a-03-2025"
+    #model_name: "meta.llama-3.3-70b-instruct"
+    #model_name: "meta.llama-4-maverick-17b-128e-instruct-fp8"
+    model_name: "meta.llama-4-scout-17b-16e-instruct"
     endpoint: "https://inference.generativeai.us-chicago-1.oci.oraclecloud.com"
     compartment_id: "ocid1.compartment.oc1..aaaaaaaaxj6fuodcmai6n6z5yyqif6a36ewfmmovn42red37ml3wxlehjmga"
     model_kwargs:
